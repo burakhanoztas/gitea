@@ -296,6 +296,10 @@ func EditProjectPost(ctx *context.Context) {
 
 // ViewProject renders the project board for a project
 func ViewProject(ctx *context.Context) {
+	ctx.Resp.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+	ctx.Resp.Header().Set("Pragma", "no-cache")
+	ctx.Resp.Header().Set("Expires", "0")
+
 	project, err := project_model.GetProjectByID(ctx, ctx.ParamsInt64(":id"))
 	if err != nil {
 		if project_model.IsErrProjectNotExist(err) {

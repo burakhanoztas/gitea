@@ -15,6 +15,8 @@ function moveIssue({item, from, to, oldIndex}) {
   updateIssueCount(to);
 
   const columnSorting = {
+    issueID: parseInt(item.dataset.issue),
+    from: parseInt(from.dataset.board),
     issues: [...columnCards].map((card, i) => ({
       issueID: parseInt($(card).attr('data-issue')),
       sorting: i
