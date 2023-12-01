@@ -691,16 +691,20 @@ func MoveIssues(ctx *context.Context) {
 			ctx.ServerError("LoadRepo", err)
 			return
 		}
-		if _, err := issues_model.CreateComment(ctx, &issues_model.CreateCommentOptions{
-			Type:              issues_model.CommentTypeProjectBoard,
-			Doer:              ctx.Doer,
-			Repo:              issue.Repo,
-			Issue:             issue,
-			OldProjectBoardID: form.From,
-			ProjectBoardID:    board.ID,
-		}); err != nil {
-			ctx.ServerError("CreateComment", err)
-			return
+	
+		// Kontrol ekleniyor: Eğer From ve board ID aynı ise tekrar yorum ekleme
+		if form.From != board.ID {
+			if _, err := issues_model.CreateComment(ctx, &issues_model.CreateCommentOptions{
+				Type:              issues_model.CommentTypeProjectBoard,
+				Doer:              ctx.Doer,
+				Repo:              issue.Repo,
+				Issue:             issue,
+				OldProjectBoardID: form.From,
+				ProjectBoardID:    board.ID,
+			}); err != nil {
+				ctx.ServerError("CreateComment", err)
+				return
+			}
 		}
 	}
 
