@@ -636,7 +636,6 @@ func MoveIssues(ctx *context.Context) {
 
 	type movedIssuesForm struct {
 		IssueID int64 `json:"issueID"`
-		From    int64 `json:"from"`
 		Issues  []struct {
 			IssueID int64 `json:"issueID"`
 			Sorting int64 `json:"sorting"`
@@ -665,6 +664,7 @@ func MoveIssues(ctx *context.Context) {
 	}
 
 	issue, err := issues_model.GetIssueByID(ctx, form.IssueID)
+	from := issue.ProjectBoardID()
 	if err != nil {
 		if issues_model.IsErrIssueNotExist(err) {
 			ctx.NotFound("IssueNotExisting", nil)
@@ -685,21 +685,20 @@ func MoveIssues(ctx *context.Context) {
 			return
 		}
 	}
-	
-	if form.From > 0 || board.ID > 0 {
+
+	if from > 0 || board.ID > 0 {
 		if err := issue.LoadRepo(ctx); err != nil {
 			ctx.ServerError("LoadRepo", err)
 			return
 		}
-	
-		// Kontrol ekleniyor: Eğer From ve board ID aynı ise tekrar yorum ekleme
-		if form.From != board.ID {
+
+		if from != board.ID {
 			if _, err := issues_model.CreateComment(ctx, &issues_model.CreateCommentOptions{
 				Type:              issues_model.CommentTypeProjectBoard,
 				Doer:              ctx.Doer,
 				Repo:              issue.Repo,
 				Issue:             issue,
-				OldProjectBoardID: form.From,
+				OldProjectBoardID: from,
 				ProjectBoardID:    board.ID,
 			}); err != nil {
 				ctx.ServerError("CreateComment", err)
